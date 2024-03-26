@@ -1,4 +1,5 @@
 import pybullet as p
+import time
 
 class RobotControl:
     def __init__(self, robot_id, joints, end_effector):
@@ -24,6 +25,7 @@ class RobotControl:
                                             targetPosition=pose, force=joint.maxForce,
                                             maxVelocity=joint.maxVelocity)
             p.stepSimulation()
+            time.sleep(1/240)
 
 
     def openGripper(self):

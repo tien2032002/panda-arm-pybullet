@@ -13,6 +13,4 @@ desiredOrientation2 = p.getQuaternionFromEuler([0, 0, 0])  # [roll, pitch, yaw] 
 time.sleep(2)
 while True:
     robot.RobotControl.moveToPose(desiredPosition, desiredOrientation)
-    time.sleep(2)
     robot.RobotControl.moveToPose(desiredPosition2, desiredOrientation2)
-    time.sleep(2)
