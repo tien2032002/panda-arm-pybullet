@@ -28,8 +28,17 @@ class RobotControl:
             time.sleep(1/240)
 
 
-    def openGripper(self):
-        pass
+    def openGripper(self, finger1, finger2):
+        for _ in range(300):
+            
+            p.setJointMotorControl2(self.robot_id, finger1.ID, p.POSITION_CONTROL,
+                                        targetPosition=finger1.upperLimit,
+                                        maxVelocity=finger1.maxVelocity)
+            p.setJointMotorControl2(self.robot_id, finger2.ID, p.POSITION_CONTROL,
+                                        targetPosition=finger2.upperLimit,
+                                        maxVelocity=finger2.maxVelocity)
+            p.stepSimulation()
+            time.sleep(1/240)
     
     def closeGripper(self):
         pass
