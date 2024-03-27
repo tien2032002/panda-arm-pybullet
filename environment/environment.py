@@ -4,7 +4,7 @@ from control.control import RobotControl
 from utils import YcbObjects
 import random
 import numpy as np
-from camera import Camera
+from environment.camera import Camera
 
 class joint:
     def __init__(self, robot_id, index):
@@ -54,14 +54,14 @@ class environment:
         # Load robot model
         self.robot = panda_robot("environment/model_description/panda_with_gripper.urdf")
         # load tables
-        self.tableID = p.loadURDF('environment/urdf/objects/table.urdf',
-                                  [0.0, -0.65, 0.76],
-                                  p.getQuaternionFromEuler([0, 0, 0]),
-                                  useFixedBase=True)
-        self.target_table_id = p.loadURDF('environment/urdf/objects/target_table.urdf',
-                                          [0.7, 0.0, 0.66],
-                                          p.getQuaternionFromEuler([0, 0, 0]),
-                                          useFixedBase=True)
+        # self.tableID = p.loadURDF('environment/urdf/objects/table.urdf',
+        #                           [0.0, -0.65, 0.76],
+        #                           p.getQuaternionFromEuler([0, 0, 0]),
+        #                           useFixedBase=True)
+        # self.target_table_id = p.loadURDF('environment/urdf/objects/target_table.urdf',
+        #                                   [0.7, 0.0, 0.66],
+        #                                   p.getQuaternionFromEuler([0, 0, 0]),
+        #                                   useFixedBase=True)
         #load camera
         self.camera = Camera((0.05, -0.52, 1.9), (0.05, -0.52, 0.785), 0.2, 2.0, (224, 224), 40)
         

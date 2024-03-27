@@ -5,7 +5,7 @@ import torch.utils.data
 from PIL import Image
 from datetime import datetime
 
-from network.hardware.device import get_device
+# from network.hardware.device import get_device
 from network.inference.post_process import post_process_output
 from network.utils.data.camera_data import CameraData
 from network.utils.visualisation.plot import plot_results, save_results
