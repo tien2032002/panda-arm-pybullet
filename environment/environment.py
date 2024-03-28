@@ -64,7 +64,7 @@ class environment:
         self.robot = panda_robot("/environment/model_description/panda_with_gripper.urdf")
         # load tables
         self.tableID = p.loadURDF('environment/urdf/objects/table.urdf',
-                                  [0.0, -0.65, 0.76],
+                                  [0.0, -0.65, 0.4],
                                   p.getQuaternionFromEuler([0, 0, 0]),
                                   useFixedBase=True)
         self.target_table_id = p.loadURDF('environment/urdf/objects/target_table.urdf',
@@ -88,6 +88,7 @@ class environment:
         for _ in range(10):
            p.stepSimulation()
         self.update_obj_states()
+        return p.getBasePositionAndOrientation(obj_id)
     
     def load_obj(self, path, pos, yaw, mod_orn=False, mod_stiffness=False):
         orn = p.getQuaternionFromEuler([0, 0, yaw])
