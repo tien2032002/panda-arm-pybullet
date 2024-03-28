@@ -1,4 +1,5 @@
 import pybullet as p
+import pybullet_data
 import time
 from control.control import RobotControl
 from utils import YcbObjects
@@ -51,8 +52,16 @@ class environment:
         self.obj_orientations = []
         p.connect(p.GUI)   
         p.resetSimulation()
+
+        # add gravity
+        # gravity = [0, 0, -9.81]  # Set gravity along the z-axis (negative z direction)
+        # p.setGravity(gravity[0], gravity[1], gravity[2])
+
+        p.setAdditionalSearchPath(pybullet_data.getDataPath())
+        # Load the ground plane
+        self.planeId = p.loadURDF("plane.urdf")
         # Load robot model
-        self.robot = panda_robot("environment/model_description/panda_with_gripper.urdf")
+        self.robot = panda_robot("/home/baotien/panda-arm-pybullet/environment/model_description/panda_with_gripper.urdf")
         # load tables
         # self.tableID = p.loadURDF('environment/urdf/objects/table.urdf',
         #                           [0.0, -0.65, 0.76],

@@ -27,6 +27,7 @@ class RobotControl:
             p.stepSimulation()
             time.sleep(1/240)
 
+    
 
     def openGripper(self, finger1, finger2):
         for _ in range(300):
