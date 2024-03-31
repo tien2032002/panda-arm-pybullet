@@ -72,7 +72,7 @@ class environment:
                                           p.getQuaternionFromEuler([0, 0, 0]),
                                           useFixedBase=True)
         #load camera
-        self.camera = Camera((0.05, -0.52, 1.9), (0.05, -0.52, 0.785), 0.2, 2.0, (224, 224), 40)
+        self.camera = Camera((0.1, -0.4, 1), (-0.033510389871985444, -0.4506058588839027, 0.66), 0.2, 2.0, (224, 224), 40)
         
 
 

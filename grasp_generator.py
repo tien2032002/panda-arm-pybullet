@@ -4,8 +4,9 @@ from numpy.lib.npyio import save
 import torch.utils.data
 from PIL import Image
 from datetime import datetime
+import torch
+# print(torch.__version__)
 
-# from network.hardware.device import get_device
 from network.inference.post_process import post_process_output
 from network.utils.data.camera_data import CameraData
 from network.utils.visualisation.plot import plot_results, save_results
@@ -34,8 +35,8 @@ class GraspGenerator:
     MAX_GRASP = 0.085
 
     def __init__(self, net_path, camera, depth_radius):
-        self.net = torch.load(net_path, map_location='cpu')
         self.device = get_device(force_cpu=True)
+        self.net = torch.load(net_path, map_location = self.device)
 
         self.near = camera.near
         self.far = camera.far
@@ -133,6 +134,7 @@ class GraspGenerator:
 
             grasps = detect_grasps(
                 q_img, ang_img, width_img=width_img, no_grasps=n_grasps)
+            print(grasps)
             return grasps, save_name
 
     def predict_grasp(self, rgb, depth, n_grasps=1, show_output=False):
@@ -145,3 +147,5 @@ class GraspGenerator:
             grasps.append((x, y, z, roll, opening_len, obj_height))
 
         return grasps, save_name
+
+
