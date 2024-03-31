@@ -26,16 +26,19 @@ class panda_robot:
     def __init__(self, urdf_path):
         # load urdf
         self.id = p.loadURDF(urdf_path, [0, 0, 0], useFixedBase=True)
+
         
         #   get robot joints
         self.numJoints = p.getNumJoints(self.id)
         self.joints = [None]*self.numJoints
         for i in range(self.numJoints):
             self.joints[i] = joint(self.id, i)
+            # print(self.joints[i].name)
 
         # create control api
         self.end_effector = self.joints[7]
         self.RobotControl = RobotControl(self.id, self.joints, self.end_effector)
+        print(self.end_effector.name)
 
     
     def getJointByName(self, name):
@@ -61,17 +64,18 @@ class environment:
         # Load the ground plane
         self.planeId = p.loadURDF("plane.urdf")
         # Load robot model
-        self.robot = panda_robot("/environment/model_description/panda_with_gripper.urdf")
+        self.robot = panda_robot("environment/model_description/urdf/panda.urdf")
         # load tables
-        self.tableID = p.loadURDF('environment/urdf/objects/table.urdf',
-                                  [0.0, -0.65, 0.4],
-                                  p.getQuaternionFromEuler([0, 0, 0]),
-                                  useFixedBase=True)
-        self.target_table_id = p.loadURDF('environment/urdf/objects/target_table.urdf',
-                                          [0.7, 0.0, 0.66],
-                                          p.getQuaternionFromEuler([0, 0, 0]),
-                                          useFixedBase=True)
+        # self.tableID = p.loadURDF('environment/urdf/objects/table.urdf',
+        #                           [0.0, -0.65, 0.4],
+        #                           p.getQuaternionFromEuler([0, 0, 0]),
+        #                           useFixedBase=True)
+        # self.target_table_id = p.loadURDF('environment/urdf/objects/target_table.urdf',
+        #                                   [0.7, 0.0, 0.66],
+        #                                   p.getQuaternionFromEuler([0, 0, 0]),
+        #                                   useFixedBase=True)
         #load camera
+
         self.camera = Camera((0.1, -0.4, 1), (-0.033510389871985444, -0.4506058588839027, 0.66), 0.2, 2.0, (224, 224), 40)
         
 

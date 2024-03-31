@@ -5,6 +5,7 @@ import numpy as np
 from scipy.spatial import KDTree
 from collections import deque
 import math
+import random
 
 # from pybullet_planning import plan_rrt_connect
 from grasp_generator import GraspGenerator
@@ -19,28 +20,25 @@ if __name__ == '__main__':
     #get camera info from world
     camera = world.camera
     #create GraspGenerator using world's camera
-    generator = GraspGenerator(network_path, camera, 5)
+    # generator = GraspGenerator(network_path, camera, 5)
 
-    desiredPosition = [0, 0 , 2]  # [x, y, z] in meters
-    desiredOrientation = p.getQuaternionFromEuler([0, 0, 0])  # [roll, pitch, yaw] in radians
-    desiredPosition2 = [-1.5, -0.5, 0.5]  # [x, y, z] in meters
-    desiredOrientation2 = p.getQuaternionFromEuler([0, 0, 0])  # [roll, pitch, yaw] in radians
 
+        
     # load objects
-    objects = YcbObjects('objects/ycb_objects',
-                    mod_orn=['MediumClamp', 'MustardBottle',
-                                'TomatoSoupCan'],
-                    mod_stiffness=['Strawberry'])
-    objects.shuffle_objects()
-    world.obj_init_pos = (0.05, -0.52)
+    # objects = YcbObjects('objects/ycb_objects',
+    #                 mod_orn=['MediumClamp', 'MustardBottle',
+    #                             'TomatoSoupCan'],
+    #                 mod_stiffness=['Strawberry'])
+    # objects.shuffle_objects()
+    # world.obj_init_pos = (0.05, -0.52)
 
     #load cup model
-    pose, orientation = world.load_isolated_obj('objects/ycb_objects/YcbCup/model.urdf')
-    print(pose)
-    robot.RobotControl.moveToPose(desiredPosition, desiredOrientation)
-    rgb, depth, _ = camera.get_cam_img()
-    grasps, save_name = generator.predict_grasp(rgb, depth, n_grasps = 3, show_output=True)
-    print(grasps)
+    # pose, orientation = world.load_isolated_obj('objects/ycb_objects/YcbCup/model.urdf')
+    # print(pose)
+    # robot.RobotControl.moveToPose(desiredPosition, desiredOrientation)
+    # rgb, depth, _ = camera.get_cam_img()
+    # grasps, save_name = generator.predict_grasp(rgb, depth, n_grasps = 3, show_output=True)
+    # print(grasps)
     
     # for obj_name in objects.obj_names:
     #     path, mod_orn, mod_stiffness = objects.get_obj_info(obj_name)
@@ -65,7 +63,10 @@ if __name__ == '__main__':
     #     print('\n')
     #     world.remove_all_obj()
 
-    # robot.RobotControl.moveToPose(desiredPosition, desiredOrientation)
+    print("do")
+    pose = [0.5, 0.5, 0.5]
+    orientation = p.getQuaternionFromEuler([0, 0, 0])
+    robot.RobotControl.moveToPose(pose, orientation)
     # robot.RobotControl.openGripper(robot.getJointByName("panda_finger_joint1"),
     #                                robot.getJointByName("panda_finger_joint2"))
     # while True:
