@@ -16,85 +16,35 @@ network_path = 'network/trained-models/cornell-randsplit-rgbd-grconvnet3-drop1-c
 if __name__ == '__main__':
     world = environment()
     robot = world.robot
+    robotControl = RobotControl(robot)
 
     #get camera info from world
     camera = world.camera
-    #create GraspGenerator using world's camera
-    # generator = GraspGenerator(network_path, camera, 5)
+    gripper_opening_length_control = p.addUserDebugParameter("gripper_opening_length",
+                                            0,
+                                            0.085,
+                                            0.085)
 
-
-        
-    # load objects
-    # objects = YcbObjects('objects/ycb_objects',
-    #                 mod_orn=['MediumClamp', 'MustardBottle',
-    #                             'TomatoSoupCan'],
-    #                 mod_stiffness=['Strawberry'])
-    # objects.shuffle_objects()
-    # world.obj_init_pos = (0.05, -0.52)
-
-    #load cup model
-    # pose, orientation = world.load_isolated_obj('objects/ycb_objects/YcbCup/model.urdf')
-    # print(pose)
-    # robot.RobotControl.moveToPose(desiredPosition, desiredOrientation)
-    # rgb, depth, _ = camera.get_cam_img()
-    # grasps, save_name = generator.predict_grasp(rgb, depth, n_grasps = 3, show_output=True)
-    # print(grasps)
-    
-    # for obj_name in objects.obj_names:
-    #     path, mod_orn, mod_stiffness = objects.get_obj_info(obj_name)
-    #     world.load_isolated_obj(path, mod_orn, mod_stiffness)
-        
-    #     rgb, depth, _ = camera.get_cam_img()
-        
-    #     grasps, save_name = generator.predict_grasp(rgb, depth, n_grasps = 3, show_output=False)
-    #     print(obj_name)
-    #     for i, grasp in enumerate(grasps):
-    #         x, y, z, roll, opening_len, obj_height = grasp
-
-    #         print(f'x:{x} y:{y} z:{z} roll:{opening_len} obj_height:{obj_height}')
-            
-    #         for _ in range(50):
-    #             p.stepSimulation() #default stepStimulation delay is 1/240 second
-    #         # _, success_target = world.grasp((x,y,z), roll, opening_len, obj_height)
-
-    #         # if success_target: 
-    #         #     print('success grasped object')
-    #         #     break
-    #     print('\n')
-    #     world.remove_all_obj()
-
-    print("do")
-    pose = [0.5, 0.5, 0.5]
-    orientation = p.getQuaternionFromEuler([0, 0, 0])
-    robot.RobotControl.moveToPose(pose, orientation)
-    # robot.RobotControl.openGripper(robot.getJointByName("panda_finger_joint1"),
-    #                                robot.getJointByName("panda_finger_joint2"))
-    # while True:
-    #     pass
-    # while True:
-    #     robot.RobotControl.moveToPose(desiredPosition, desiredOrientation)
-    #     robot.RobotControl.moveToPose(desiredPosition2, desiredOrientation2)
-
-    # test
-    # Load the robot and obstacles
-    # obstacle1 = p.loadURDF("/objects/test_cube1.urdf", [1, 1, 0])
-    # obstacle2 = p.loadURDF("/objects/test_cube4.urdf", [-1, -1, 0])
-    # Start and goal configurations
-    start_config = np.array([0, 0, 0])
-    goal_config = np.array([2, 2, 0])
-
-    # Execute motion planner
-    # path = rrt_star(start_config, goal_config, [obstacle1, obstacle2])
-
-    # Execute and visualize the plan
-    # if path:
-    #     for config in path:
-    #         p.resetBasePositionAndOrientation(robot, config, [0, 0, 0, 1])
-    #         time.sleep(0.1)
-
-#     print (p.getBasePositionAndOrientation())
+    # position control
+    position_control_group = []
+    position_control_group.append(p.addUserDebugParameter('x', -0.5, 0.5, 1))
+    position_control_group.append(p.addUserDebugParameter('y', -0.5, 0.5, 1))
+    position_control_group.append(p.addUserDebugParameter('z', -0.25, 1, 0.75))
+    position_control_group.append(p.addUserDebugParameter('roll', 0, 2*np.pi, np.pi/2))
+    position_control_group.append(p.addUserDebugParameter('pitch', 0, 2*np.pi, np.pi/2))
+    position_control_group.append(p.addUserDebugParameter('yaw', 0, 2*np.pi, 0))
     while True:
-        pass
-    # Close PyBullet
-    p.disconnect()
+        gripper_opening_length = p.readUserDebugParameter(gripper_opening_length_control)
+        # print(f'gripper: {gripper_opening_length}')
+        parameter = []
+        for i in range(6):
+            parameter.append(p.readUserDebugParameter(position_control_group[i]))
+
+        parameter_orientation = p.getQuaternionFromEuler([parameter[3], parameter[4], parameter[5]])
+        robotControl.moveToPose(pose=[parameter[0], parameter[1], parameter[2]], orientation=parameter_orientation)
+        
+        robotControl.gripper_control(gripper_opening_length)
+        time.sleep(1/240)
+        p.stepSimulation()
+
 

@@ -9,17 +9,16 @@ from environment.camera import Camera
 
 class joint:
     def __init__(self, robot_id, index):
-            
-            jointTypeList = ["REVOLUTE", "PRISMATIC", "SPHERICAL", "PLANAR", "FIXED"]
-            self.robot_id = robot_id
-            self.info = p.getJointInfo(robot_id, index)
-            self.ID = self.info[0]
-            self.name = self.info[1].decode("utf-8")
-            self.lowerLimit = self.info[8]
-            self.upperLimit = self.info[9]
-            self.maxForce = self.info[10]
-            self.maxVelocity = self.info[11]
-            self.type = jointTypeList[self.info[2]]
+        jointTypeList = ["REVOLUTE", "PRISMATIC", "SPHERICAL", "PLANAR", "FIXED"]
+        self.robot_id = robot_id
+        self.info = p.getJointInfo(robot_id, index)
+        self.id = self.info[0]
+        self.name = self.info[1].decode("utf-8")
+        self.lowerLimit = self.info[8]
+        self.upperLimit = self.info[9]
+        self.maxForce = self.info[10]
+        self.maxVelocity = self.info[11]
+        self.type = jointTypeList[self.info[2]]
             
         
 class panda_robot:
@@ -27,24 +26,38 @@ class panda_robot:
         # load urdf
         self.id = p.loadURDF(urdf_path, [0, 0, 0], useFixedBase=True)
 
-        
         #   get robot joints
         self.numJoints = p.getNumJoints(self.id)
+ 
         self.joints = [None]*self.numJoints
         for i in range(self.numJoints):
             self.joints[i] = joint(self.id, i)
             # print(self.joints[i].name)
 
-        # create control api
-        self.end_effector = self.joints[7]
-        self.RobotControl = RobotControl(self.id, self.joints, self.end_effector)
-        print(self.end_effector.name)
-
+        self.end_effector = self.getJointByName("panda_robotiq_attachment_joint")
+        
+        # for gripper
+        self.mimic_parent = self.getJointByName("finger_joint")
+        self.mimic_children = [self.getJointByName("right_outer_knuckle_joint"),
+                               self.getJointByName("left_inner_knuckle_joint"),
+                               self.getJointByName("right_inner_knuckle_joint"),
+                               self.getJointByName("left_inner_finger_joint"),
+                               self.getJointByName("right_inner_finger_joint")]
+        
+        # add force sensor
+        p.enableJointForceTorqueSensor(self.id, self.getJointByName("left_inner_finger_pad_joint").id)
+        p.enableJointForceTorqueSensor(self.id, self.getJointByName("right_inner_finger_pad_joint").id)
+        
+        # change friction coeff of gripper for better grasp
+        p.changeDynamics(self.id, self.getJointByName('left_inner_finger_pad_joint').id, lateralFriction=1)
+        p.changeDynamics(self.id, self.getJointByName('right_inner_finger_pad_joint').id, lateralFriction=1)
+        
     
     def getJointByName(self, name):
-         for i in range(self.numJoints):
+        for i in range(self.numJoints):
               if self.joints[i].name == name:
                    return self.joints[i]
+        print("undefined")
 
 
 class environment:
@@ -62,11 +75,11 @@ class environment:
 
         p.setAdditionalSearchPath(pybullet_data.getDataPath())
         # Load the ground plane
-        self.planeId = p.loadURDF("plane.urdf")
+        self.planeid = p.loadURDF("plane.urdf")
         # Load robot model
         self.robot = panda_robot("environment/model_description/urdf/panda.urdf")
         # load tables
-        # self.tableID = p.loadURDF('environment/urdf/objects/table.urdf',
+        # self.tableid = p.loadURDF('environment/urdf/objects/table.urdf',
         #                           [0.0, -0.65, 0.4],
         #                           p.getQuaternionFromEuler([0, 0, 0]),
         #                           useFixedBase=True)

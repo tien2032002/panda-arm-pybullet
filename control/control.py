@@ -1,66 +1,55 @@
 import pybullet as p
-import time
 import numpy as np
 import math
 
 class RobotControl:
-    def __init__(self, robot_id, joints, end_effector):
-        self.robot_id = robot_id
-        self.joints = joints
-        self.end_effector = end_effector
+    def __init__(self, robot):
+        self.robot = robot
 
     def moveToPose(self, pose, orientation):
         # calculate ik
-        jointAngles  = p.calculateInverseKinematics(self.robot_id, self.end_effector.ID, pose, orientation)
-
-        for joint in self.joints:
-            print(joint.name + ": " + joint.type)
-        for _ in range(300):
-            for joint in self.joints:
-                if joint.ID <7:
-                    pose = jointAngles[joint.ID]
-                elif joint.ID == 7:
+        jointAngles  = p.calculateInverseKinematics(self.robot.id, self.robot.end_effector.id, pose, orientation)
+        for _ in range(1):
+            i = 0
+            for joint in self.robot.joints:
+                if joint.type == "FIXED":
                     continue
                 else:
-                    pose = jointAngles[joint.ID - 1]
-                p.setJointMotorControl2(self.robot_id, joint.ID, p.POSITION_CONTROL,
+                    pose = jointAngles[i]
+                p.setJointMotorControl2(self.robot.id, joint.id, p.POSITION_CONTROL,
                                             targetPosition=pose, force=joint.maxForce,
                                             maxVelocity=joint.maxVelocity)
-            p.stepSimulation()
-            time.sleep(1/240)
-
-    
+                i = i + 1
 
     def openGripper(self, finger1, finger2):
-        for _ in range(300):
-            
-            p.setJointMotorControl2(self.robot_id, finger1.ID, p.POSITION_CONTROL,
-                                        targetPosition=finger1.upperLimit,
-                                        maxVelocity=finger1.maxVelocity)
-            p.setJointMotorControl2(self.robot_id, finger2.ID, p.POSITION_CONTROL,
-                                        targetPosition=finger2.upperLimit,
-                                        maxVelocity=finger2.maxVelocity)
-            p.stepSimulation()
-            time.sleep(1/240)
+            pass
+
     
     def closeGripper(self, finger1, finger2):
-        for _ in range(300):
-            p.setJointMotorControl2(self.robot_id, finger1.ID, p.POSITION_CONTROL,
-                                        targetPosition=finger1.lowerLimit,
-                                        maxVelocity=finger1.maxVelocity)
-            p.setJointMotorControl2(self.robot_id, finger2.ID, p.POSITION_CONTROL,
-                                        targetPosition=finger2.lowerLimit,
-                                        maxVelocity=finger2.maxVelocity)
-            p.stepSimulation()
-            time.sleep(1/240)
+        pass
     
     
     def grasp(self, pos, roll, gripper_opening_length, obj_height):
-        x, y, z = pos
-        self.openGripper()
-        orn = p.getQuaternionFromEuler([roll, np.pi/2, 0.0])
-        self.moveToPose([x - x*math.cos(roll), y - y*math.sin(roll), z], orn)
+        pass
 
+    def gripper_control(self, gripper_opening_length):
+        # gripper_opening_length = np.clip(gripper_opening_length, *self.gripper_open_limit)
+        gripper_opening_angle = 0.715 - math.asin((gripper_opening_length - 0.010) / 0.1143)
+        mimic_multiplier = [-1, -1, -1, 1, 1]
+        p.setJointMotorControl2(self.robot.id,
+                            self.robot.mimic_parent.id,
+                            p.POSITION_CONTROL,
+                            targetPosition=gripper_opening_angle,
+                            force=self.robot.mimic_parent.maxForce,
+                            maxVelocity=self.robot.mimic_parent.maxVelocity)
+        
+        for i in range(len(self.robot.mimic_children)):
+            joint = self.robot.mimic_children[i]
+            p.setJointMotorControl2(self.robot.id, joint.id, p.POSITION_CONTROL,
+                                targetPosition=gripper_opening_angle * mimic_multiplier[i],
+                                force=joint.maxForce,
+                                maxVelocity=joint.maxVelocity)
+        
     def pour(self):
         pass
 
