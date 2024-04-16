@@ -6,6 +6,8 @@ from scipy.spatial import KDTree
 from collections import deque
 import math
 import random
+from control import control
+from control import motion_plan
 
 # from pybullet_planning import plan_rrt_connect
 from grasp_generator import GraspGenerator
@@ -16,7 +18,7 @@ network_path = 'network/trained-models/cornell-randsplit-rgbd-grconvnet3-drop1-c
 if __name__ == '__main__':
     world = environment()
     robot = world.robot
-    robotControl = RobotControl(robot)
+    robotControl = control.RobotControl(robot)
 
     #get camera info from world
     camera = world.camera
