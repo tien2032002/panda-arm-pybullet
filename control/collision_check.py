@@ -157,3 +157,8 @@ def are_links_adjacent(body, link1, link2):
     return (get_link_parent(body, link1) == link2) or \
            (get_link_parent(body, link2) == link1)
 
+BodyInfo = namedtuple('BodyInfo', ['base_name', 'body_name'])
+
+def get_body_info(body):
+    # TODO: p.syncBodyInfo
+    return BodyInfo(*p.getBodyInfo(body))

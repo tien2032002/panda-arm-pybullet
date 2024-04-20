@@ -41,10 +41,8 @@ class panda_robot:
         
         # joint index
         self.joint_idx = [j.id for j in self.activeJoints]
-        
-        print (self.joint_idx)
 
-        self.end_effector = self.get_Joint_by_name("panda_robotiq_attachment_joint")
+        self.end_effector = self.get_Joint_by_name("panda_joint8")
         
         # for gripper
         self.mimic_parent = self.get_Joint_by_name("finger_joint")
@@ -102,9 +100,6 @@ class panda_robot:
         '''
         self._set_joint_positions(self.joint_idx, state)
         self.state = state
-        for _ in range(300):
-            time.sleep(1/240)
-            p.stepSimulation()
 
     def reset(self):
         '''
@@ -112,23 +107,15 @@ class panda_robot:
         Args:
             state: list[Float], joint values of robot
         '''
-        # pose = [-1, -1, 1]
-        # orientation = p.getQuaternionFromEuler([0, 0, np.pi])
-        # print(f'upper limits = {self.upper_limits}')
-        # print(f'lower limits = {self.lower_limits}')
-        # joint_angles  = p.calculateInverseKinematics(bodyUniqueId = self.id,
-        #                                     endEffectorLinkIndex = self.end_effector.id, 
-        #                                     targetPosition = pose, 
-        #                                     targetOrientation = orientation,
-        #                                     lowerLimits = self.lower_limits,
-        #                                     upperLimits = self.upper_limits)
-        # state = []
-        # for i, (lower_limit, upper_limit) in enumerate(self.get_bounds()):
-        #     state.append(np.clip(joint_angles[i], lower_limit, upper_limit))
-        # self._set_joint_positions(self.joint_idx, state)
-        state = [0.01] *self.num_dim
+        # generate random valid state
+        state = []
+        for i in range (self.num_dim):
+            # get random value in joints bound
+            print (self.joint_bounds[i][1])
+            state.append(random.random()*(self.joint_bounds[i][1] - self.joint_bounds[i][0]) + self.joint_bounds[i][0])
         self.state = state
         self.set_state(state)
+        print (f'New state value: {state}')
 
     def _set_joint_positions(self, joints, positions):
         for joint, value in zip(joints, positions):
@@ -152,7 +139,7 @@ class environment:
         # Load the ground plane
         self.planeid = p.loadURDF("plane.urdf")
         # Load robot model
-        self.robot = panda_robot("environment/model_description/urdf/panda.urdf")
+        self.robot = panda_robot("/home/baotien/panda-arm-pybullet/environment/model_description/urdf/panda.urdf")
         
         # load tables
         # self.tableid = p.loadURDF('environment/urdf/objects/table.urdf',

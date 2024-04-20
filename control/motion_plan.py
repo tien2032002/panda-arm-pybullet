@@ -73,7 +73,7 @@ class PbOMPL():
         self.set_obstacles(obstacles)
         
         # change planner here
-        self.set_planner("RRT") # RRT by default
+        self.set_planner("BITstar") # RRT by default
 
     def set_obstacles(self, obstacles):
         self.obstacles = obstacles
@@ -86,24 +86,25 @@ class PbOMPL():
 
     def remove_obstacles(self, obstacle_id):
         self.obstacles.remove(obstacle_id)
-
+    
     def is_state_valid(self, state):
         # satisfy bounds TODO
         # Should be unecessary if joint bounds is properly set
         # check self-collision
-        # return True
         self.robot.set_state(self.state_to_list(state))
         for link1, link2 in self.check_link_pairs:
             if collision_check.pairwise_link_collision(self.robot_id, link1, self.robot_id, link2):
-                print(link1, link2)
+                # not include collision between eef joints and links
+                if link1 in range(9,19) and link2 in range(9,19):
+                    continue
                 return False
-
         # check collision against environment
         for body1, body2 in self.check_body_pairs:
             if collision_check.pairwise_collision(body1, body2):
-                print('body collision', body1, body2)
-                # print(get_body_name(body1), get_body_name(body2))
+                # print('body collision', body1, body2)
                 return False
+            
+        # time.sleep(2)
         return True
 
     def setup_collision_detection(self, robot, obstacles, self_collisions = True, allow_collision_links = []):
@@ -137,34 +138,41 @@ class PbOMPL():
 
         self.ss.setPlanner(self.planner)
 
-    def plan_start_goal(self, start, goal, allowed_time = 5.0):
+    def plan_start_goal(self, start, goal, allowed_time = 0.01):
         '''
         plan a path to gaol from the given robot start state
         '''
         print("start_planning")
         print(self.planner.params())
 
-        orig_robot_state = self.robot.get_cur_state()
-
+        orig_robot_state = start
+        
         # set the start and goal states;
         s = ob.State(self.space)
         g = ob.State(self.space)
         for i in range(len(start)):
-            print(type(start[i]))
             s[i] = start[i]
             g[i] = goal[i]
+            print(f'goal: {goal}')
 
         self.ss.setStartAndGoalStates(s, g)
 
         # attempt to solve the problem within allowed planning time
         solved = self.ss.solve(allowed_time)
+        
+        if solved:
+            # try to shorten the path
+            self.ss.simplifySolution()
+            # print the simplified path
+            print (self.ss.getSolutionPath())
+            
         res = False
         sol_path_list = []
         if solved:
-            print("Found solution: interpolating into {} segments".format(500))
+            print("Found solution: interpolating into {} segments".format(300))
             # print the path to screen
             sol_path_geometric = self.ss.getSolutionPath()
-            sol_path_geometric.interpolate(500)
+            # sol_path_geometric.interpolate(300)
             sol_path_states = sol_path_geometric.getStates()
             sol_path_list = [self.state_to_list(state) for state in sol_path_states]
             # print(len(sol_path_list))
@@ -179,7 +187,7 @@ class PbOMPL():
         self.robot.set_state(orig_robot_state)
         return res, sol_path_list
 
-    def plan(self, goal, allowed_time = 5.0):
+    def plan(self, goal, allowed_time = 0.5):
         '''
         plan a path to goal from current robot state
         '''
@@ -187,7 +195,7 @@ class PbOMPL():
         print(f'Start: {start}')
         return self.plan_start_goal(start, goal, allowed_time=allowed_time)
 
-    def execute(self, path, dynamics=False):
+    def execute(self, path, dynamics=True):
         '''
         Execute a planned plan. Will visualize in pybullet.
         Args:

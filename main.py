@@ -46,7 +46,7 @@ if __name__ == '__main__':
         robotControl.moveToPose(pose=[parameter[0], parameter[1], parameter[2]], orientation=parameter_orientation)
         
         robotControl.gripper_control(gripper_opening_length)
-        time.sleep(1/240)
-        p.stepSimulation()
+        print(f'eef pose: {p.getJointState(robot.id, robot.end_effector.id)}')
+        time.sleep(2)
 
 

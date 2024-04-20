@@ -13,12 +13,13 @@ class RobotControl:
         self.pb_ompl_interface = motion_plan.PbOMPL(self.robot, obstacles=[])
         
         # change planner here
-        self.pb_ompl_interface.set_planner("RRT")
+        self.pb_ompl_interface.set_planner("BITstar")
         
         # add obstacles
         # for demo only, rewrite obstacles lib later
         self.obstacles = []
         self.add_obstacles()
+        self.gripper_control(0.085)
         
     def clear_obstacles(self):
         for obstacle in self.obstacles:
@@ -41,45 +42,34 @@ class RobotControl:
 
     def moveToPose(self, pose, orientation):
         # calculate ik
-        jointAngles  = p.calculateInverseKinematics(bodyUniqueId = self.robot.id,
-                                                    endEffectorLinkIndex = self.robot.end_effector.id, 
-                                                    targetPosition = pose, 
-                                                    targetOrientation = orientation,
-                                                    lowerLimits = self.robot.lower_limits,
-                                                    upperLimits = self.robot.upper_limits)
-        res, path = self.pb_ompl_interface.plan(jointAngles)
-        if res:
-            for pose in path:
-                i = 0
-                for joint in self.robot.joints:
-                    if joint.type == "FIXED":
-                        continue
-                    else:
-                        jointPose = pose[i]
-                    p.setJointMotorControl2(self.robot.id, joint.id, p.POSITION_CONTROL,
-                                                targetPosition=jointPose, force=joint.maxForce,
-                                                maxVelocity=joint.maxVelocity)
-                    i = i + 1
-        else:
-            print("Invalid initial state, auto generate random state")
-            time.sleep
-            random_valid_state = [0]*self.robot.num_dim
+        print(f'current state: {self.robot.get_cur_state()}')
+        while (1):
+            jointAngles  = p.calculateInverseKinematics(bodyUniqueId = self.robot.id,
+                                                        endEffectorLinkIndex = self.robot.end_effector.id, 
+                                                        targetPosition = pose, 
+                                                        targetOrientation = orientation,
+                                                        lowerLimits = self.robot.lower_limits,
+                                                        upperLimits = self.robot.upper_limits)
             for i in range(self.robot.num_dim):
-                random_valid_state[i] = self.robot.lower_limits[i] + random.random()*(self.robot.upper_limits[i] - self.robot.lower_limits[i])
-            for pose1 in random_valid_state:
-                i = 0
-                for joint in self.robot.joints:
-                    if joint.type == "FIXED":
+                if jointAngles[i] <= self.robot.lower_limits[i] or  jointAngles[i] >= self.robot.upper_limits[i]:
                         continue
-                    else:
-                        jointPose = pose1
-                    p.setJointMotorControl2(self.robot.id, joint.id, p.POSITION_CONTROL,
-                                                targetPosition=jointPose, force=joint.maxForce,
-                                                maxVelocity=joint.maxVelocity)
-            self.moveToPose(pose, orientation)
-                
+            break
         
-
+        res, path = self.pb_ompl_interface.plan(jointAngles)
+        # print (f'path: {path}')
+        for state in path: 
+            for i in range(self.robot.num_dim):
+                pose = state[i]
+                j = self.robot.activeJoints[i]
+                if j.id in range (9, 19): 
+                    continue
+                p.setJointMotorControl2(self.robot.id, j.id, p.POSITION_CONTROL,
+                                        targetPosition=pose, force=j.maxForce,
+                                        maxVelocity=j.maxVelocity)
+                p.stepSimulation()
+                time.sleep(1/300)
+        print(f'goal state: {self.robot.get_cur_state()}')
+            
     
     def openGripper(self, finger1, finger2):
             pass
