@@ -21,6 +21,11 @@ class RobotControl:
         self.add_obstacles()
         self.gripper_control(0.085)
         
+        self.gripper_open_limit = (0.0, 0.1)
+        self.ee_position_limit = ((-0.8, 0.8),
+                                  (-0.8, 0.8),
+                                  (0.785, 1.4))
+        
     def clear_obstacles(self):
         for obstacle in self.obstacles:
             p.removeBody(obstacle)
@@ -78,9 +83,26 @@ class RobotControl:
     def closeGripper(self, finger1, finger2):
         pass
     
+    def calc_z_offset(self, gripper_opening_length: float):
+        gripper_opening_length = np.clip(
+            gripper_opening_length, *self.gripper_open_limit)
+        gripper_opening_angle = 0.715 - \
+            math.asin((gripper_opening_length - 0.010) / 0.1143)
+        gripper_length = 10.3613 * \
+            np.sin(1.64534-0.24074 * (gripper_opening_angle / np.pi)) - 10.1219
+        return gripper_length
     
     def grasp(self, pos, roll, gripper_opening_length, obj_height):
-        pass
+        x, y, z = pos
+        # Substracht gripper finger length from z
+        z -= self.finger_length
+        z = np.clip(z, *self.ee_position_limit[2])
+        self.gripper_control(0.1)
+        orn = p.getQuaternionFromEuler([roll, np.pi/2, 0.0])
+        self.moveToPose([x, y, 1.25, orn])
+        gripper_opening_length *= 0.6
+        z_offset = self.calc_z_offset(gripper_opening_length)
+        self.moveToPose([x, y, z + z_offset, orn])
 
     def gripper_control(self, gripper_opening_length):
         # gripper_opening_length = np.clip(gripper_opening_length, *self.gripper_open_limit)
