@@ -43,10 +43,10 @@ if __name__ == '__main__':
             parameter.append(p.readUserDebugParameter(position_control_group[i]))
 
         parameter_orientation = p.getQuaternionFromEuler([parameter[3], parameter[4], parameter[5]])
-        robotControl.moveToPose(pose=[parameter[0], parameter[1], parameter[2]], orientation=parameter_orientation)
+        robotControl.moveToPose(pose=[parameter[0], parameter[1], parameter[2] + 0.78], orientation=parameter_orientation)
         
         robotControl.gripper_control(gripper_opening_length)
-        print(f'eef pose: {p.getJointState(robot.id, robot.end_effector.id)}')
+        # print(f'eef pose: {p.getJointState(robot.id, robot.end_effector.id)}')
         time.sleep(2)
 
 

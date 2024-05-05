@@ -42,18 +42,19 @@ class RobotControl:
 
     def moveToPose(self, pose, orientation):
         # calculate ik
-        print(f'current state: {self.robot.get_cur_state()}')
+        # print(f'current state: {self.robot.get_cur_state()}')
         while (1):
             jointAngles  = p.calculateInverseKinematics(bodyUniqueId = self.robot.id,
-                                                        endEffectorLinkIndex = self.robot.end_effector.id, 
+                                                        endEffectorLinkIndex = self.robot.end_effector_idx, 
                                                         targetPosition = pose, 
                                                         targetOrientation = orientation,
                                                         lowerLimits = self.robot.lower_limits,
                                                         upperLimits = self.robot.upper_limits)
             for i in range(self.robot.num_dim):
-                if jointAngles[i] <= self.robot.lower_limits[i] or  jointAngles[i] >= self.robot.upper_limits[i]:
+                if jointAngles[i] <= self.robot.lower_limits[i] or jointAngles[i] >= self.robot.upper_limits[i]:
                         continue
             break
+        print(f'joint angles: {jointAngles}')
         
         res, path = self.pb_ompl_interface.plan(jointAngles)
         # print (f'path: {path}')
@@ -68,7 +69,6 @@ class RobotControl:
                                         maxVelocity=j.maxVelocity)
                 p.stepSimulation()
                 time.sleep(1/300)
-        print(f'goal state: {self.robot.get_cur_state()}')
             
     
     def openGripper(self, finger1, finger2):
@@ -85,7 +85,7 @@ class RobotControl:
     def gripper_control(self, gripper_opening_length):
         # gripper_opening_length = np.clip(gripper_opening_length, *self.gripper_open_limit)
         gripper_opening_angle = 0.715 - math.asin((gripper_opening_length - 0.010) / 0.1143)
-        mimic_multiplier = [-1, -1, -1, 1, 1]
+        mimic_multiplier = [1, 1, 1, -1, -1]
         p.setJointMotorControl2(self.robot.id,
                             self.robot.mimic_parent.id,
                             p.POSITION_CONTROL,
@@ -99,7 +99,21 @@ class RobotControl:
                                 targetPosition=gripper_opening_angle * mimic_multiplier[i],
                                 force=joint.maxForce,
                                 maxVelocity=joint.maxVelocity)
-        
+       
+    def check_grasped(self):
+        left_index = self.robot.get_Joint_by_name('left_inner_finger_pad_joint').id
+        right_index = self.robot.get_Joint_by_name('right_inner_finger_pad_joint').id
+
+        contact_left = p.getContactPoints(
+            bodyA=self.robot_id, linkIndexA=left_index)
+        contact_right = p.getContactPoints(
+            bodyA=self.robot_id, linkIndexA=right_index)
+        contact_ids = set(item[2] for item in contact_left +
+                          contact_right if item[2] in [self.obj_id])
+        if len(contact_ids) == 1:
+            return True
+        return False
+    
     def pour(self):
         pass
 

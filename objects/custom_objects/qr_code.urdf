@@ -1,0 +1,32 @@
+<?xml version="1.0" ?>
+<robot name="qr_code">
+
+    <link name="base_link">
+        <visual>
+            <geometry>
+                <box size="0.02 0.02 0.001"/>
+            </geometry>
+            <material name="white">
+                <color rgba="1 1 1 1"/>
+            </material>
+        </visual>
+    </link>
+
+    <link name="qr_code_link">
+        <visual>
+            <geometry>
+                <box size="0.02 0.02 0.001"/>
+            </geometry>
+            <material name="qr_code">
+                <color rgba="0 0 0 1"/>
+            </material>
+        </visual>
+    </link>
+
+    <joint name="fixed_joint" type="fixed">
+        <parent link="base_link"/>
+        <child link="qr_code_link"/>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+    </joint>
+
+</robot>

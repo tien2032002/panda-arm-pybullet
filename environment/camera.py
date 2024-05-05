@@ -1,6 +1,7 @@
 import pybullet as p
 import os
-import datetime
+from datetime import datetime
+
 
 class Camera:
     def __init__(self, cam_pos, cam_target, near, far, size, fov):
@@ -26,10 +27,8 @@ class Camera:
         segmentation mask
         """
         # Get depth values using the OpenGL renderer
-        _w, _h, rgb, depth, seg = p.getCameraImage(self.width, self.height,
-                                                   self.view_matrix, self.projection_matrix,
-                                                   )
-        return rgb[:, :, 0:3], depth, seg
+        _w, _h, rgb, depth, seg = p.getCameraImage(self.width, self.height, self.view_matrix, self.projection_matrix,)
+        return rgb, depth, seg
 
     def start_recording(self, save_dir):
         if not os.path.exists(save_dir):

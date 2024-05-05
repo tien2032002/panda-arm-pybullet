@@ -1,0 +1,62 @@
+<?xml version="1.0"?>
+<robot name="glass_shelf_with_qr">
+
+  <link name="base_link">
+    <visual>
+      <geometry>
+        <cylinder radius="0.05" length="0.2"/>
+      </geometry>
+      <material name="glass">
+        <color rgba="1.0 1.0 0.0 1"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder radius="0.05" length="0.2"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="fixed_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="top_link"/>
+    <origin rpy="0 0 0" xyz="0 0 0.1"/>
+  </joint>
+
+  <link name="top_link">
+    <visual>
+      <geometry>
+        <cylinder radius="0.04" length="0.01"/>
+      </geometry>
+      <material name="glass">
+        <color rgba="1.0 1.0 0.0 1"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder radius="0.04" length="0.01"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <!--QR Code -->
+  <material name="qr_code">
+    <texture filename="qr_code.png" />
+  </material>
+  <link name="qr_code_link">
+    <visual>
+      <geometry>
+        <box size="0.1 0.1 0.001" />
+        <mesh filename="qr_code.png" scale="1 1 1" />
+      </geometry>
+      <material name="qr_code" />
+    </visual>
+  </link>
+
+  <joint name="qr_code_joint" type="fixed">
+    <parent link="top_link"/>
+    <child link="qr_code_link"/>
+    <origin rpy="0 0 0" xyz="0 0 0.08"/>
+  </joint>
+
+</robot>

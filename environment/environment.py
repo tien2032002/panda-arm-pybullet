@@ -6,6 +6,7 @@ import random
 import numpy as np
 from environment.camera import Camera
 import copy
+import environment.obstacles as obs
 
 class joint:
     def __init__(self, robot_id, index):
@@ -24,7 +25,7 @@ class joint:
 class panda_robot:
     def __init__(self, urdf_path):
         # load urdf
-        self.id = p.loadURDF(urdf_path, [0, 0, 0], useFixedBase=True)
+        self.id = p.loadURDF(urdf_path, [0, 0, 0.785], useFixedBase=True)
 
 
         #   get robot joints (all of joints, contain fixed joints)
@@ -37,12 +38,14 @@ class panda_robot:
  
         # dof, only non-fixed joints
         self.activeJoints = [j for j in self.joints if j.type != "FIXED"]
-        self.num_dim = len(self.activeJoints)
+        for active_joint in self.activeJoints:
+            print(f'ID: {active_joint.id}, Name: {active_joint.name}')
+        self.num_dim = 6
         
         # joint index
         self.joint_idx = [j.id for j in self.activeJoints]
 
-        self.end_effector = self.get_Joint_by_name("panda_joint8")
+        self.end_effector_idx = 7
         
         # for gripper
         self.mimic_parent = self.get_Joint_by_name("finger_joint")
@@ -73,13 +76,17 @@ class panda_robot:
         self.lower_limits = []
         self.upper_limits = []
         self.joint_bounds = []
+        i = 0
         for j in self.activeJoints:
+            if i >= self.num_dim:
+                break
             low = j.lowerLimit # low bounds
             high = j.upperLimit # high bounds
             self.lower_limits.append(low)
             self.upper_limits.append(high)
             if low < high:
                 self.joint_bounds.append([low, high])
+            i = i+1
         print("Joint bounds: {}".format(self.joint_bounds))
         return self.joint_bounds
     
@@ -108,11 +115,8 @@ class panda_robot:
             state: list[Float], joint values of robot
         '''
         # generate random valid state
-        state = []
-        for i in range (self.num_dim):
-            # get random value in joints bound
-            print (self.joint_bounds[i][1])
-            state.append(random.random()*(self.joint_bounds[i][1] - self.joint_bounds[i][0]) + self.joint_bounds[i][0])
+        state = [-1.5690622952052096, -1.5446774605904932, 1.343946009733127, -1.3708613585093699,
+                           -1.5707970583733368, 0.0009377758247187636, 0.085]
         self.state = state
         self.set_state(state)
         print (f'New state value: {state}')
@@ -136,10 +140,14 @@ class environment:
         p.setGravity(gravity[0], gravity[1], gravity[2])
 
         p.setAdditionalSearchPath(pybullet_data.getDataPath())
+        center_x, center_y = 0.05, -0.52
+        self.camera = Camera((center_x, center_y, 2.0), (center_x, center_y, 0.785), 0.2, 2.0, (224, 224), 40)
+        self.world = obs.Obstacles(self.camera)
+        
         # Load the ground plane
-        self.planeid = p.loadURDF("plane.urdf")
+        # self.planeid = p.loadURDF("plane.urdf")
         # Load robot model
-        self.robot = panda_robot("/home/baotien/panda-arm-pybullet/environment/model_description/urdf/panda.urdf")
+        self.robot = panda_robot("environment/model_description/urdf/ur5_robotiq_85.urdf")
         
         # load tables
         # self.tableid = p.loadURDF('environment/urdf/objects/table.urdf',
@@ -152,7 +160,7 @@ class environment:
         #                                   useFixedBase=True)
         #load camera
 
-        self.camera = Camera((0.1, -0.4, 1), (-0.033510389871985444, -0.4506058588839027, 0.66), 0.2, 2.0, (224, 224), 40)
+        # self.camera = Camera((0.1, -0.4, 1), (-0.033510389871985444, -0.4506058588839027, 0.66), 0.2, 2.0, (224, 224), 40)
         
 
 

@@ -95,7 +95,7 @@ class PbOMPL():
         for link1, link2 in self.check_link_pairs:
             if collision_check.pairwise_link_collision(self.robot_id, link1, self.robot_id, link2):
                 # not include collision between eef joints and links
-                if link1 in range(9,19) and link2 in range(9,19):
+                if link1 in range(9,19) or link2 in range(9,19):
                     continue
                 return False
         # check collision against environment
@@ -150,14 +150,20 @@ class PbOMPL():
         # set the start and goal states;
         s = ob.State(self.space)
         g = ob.State(self.space)
+        i=0
         for i in range(len(start)):
+            if i>=self.robot.num_dim:
+                break
             s[i] = start[i]
             g[i] = goal[i]
-            print(f'goal: {goal}')
+            i=i+1
 
+        print(f'start: {s}; goal: {g}')
         self.ss.setStartAndGoalStates(s, g)
 
         # attempt to solve the problem within allowed planning time
+        if (self.ss.getPlanner()):
+            self.ss.getPlanner().clear()
         solved = self.ss.solve(allowed_time)
         
         if solved:
@@ -169,12 +175,13 @@ class PbOMPL():
         res = False
         sol_path_list = []
         if solved:
-            print("Found solution: interpolating into {} segments".format(300))
+            # print("Found solution: interpolating into {} segments".format(300))
             # print the path to screen
             sol_path_geometric = self.ss.getSolutionPath()
-            # sol_path_geometric.interpolate(300)
+            sol_path_geometric.interpolate(300)
             sol_path_states = sol_path_geometric.getStates()
             sol_path_list = [self.state_to_list(state) for state in sol_path_states]
+            # self.ss.getPlanner().clear()
             # print(len(sol_path_list))
             # print(sol_path_list)
             for sol_path in sol_path_list:
