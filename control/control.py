@@ -85,20 +85,23 @@ class RobotControl:
     def gripper_control(self, gripper_opening_length):
         # gripper_opening_length = np.clip(gripper_opening_length, *self.gripper_open_limit)
         gripper_opening_angle = 0.715 - math.asin((gripper_opening_length - 0.010) / 0.1143)
-        mimic_multiplier = [1, 1, 1, -1, -1]
-        p.setJointMotorControl2(self.robot.id,
-                            self.robot.mimic_parent.id,
-                            p.POSITION_CONTROL,
-                            targetPosition=gripper_opening_angle,
-                            force=self.robot.mimic_parent.maxForce,
-                            maxVelocity=self.robot.mimic_parent.maxVelocity)
-        
-        for i in range(len(self.robot.mimic_children)):
-            joint = self.robot.mimic_children[i]
-            p.setJointMotorControl2(self.robot.id, joint.id, p.POSITION_CONTROL,
-                                targetPosition=gripper_opening_angle * mimic_multiplier[i],
-                                force=joint.maxForce,
-                                maxVelocity=joint.maxVelocity)
+        mimic_multiplier = [-1, -1, -1, 1, 1]
+        for _ in range(240):
+            p.setJointMotorControl2(self.robot.id,
+                                self.robot.mimic_parent.id,
+                                p.POSITION_CONTROL,
+                                targetPosition=gripper_opening_angle,
+                                force=self.robot.mimic_parent.maxForce,
+                                maxVelocity=self.robot.mimic_parent.maxVelocity)
+            
+            for i in range(len(self.robot.mimic_children)):
+                joint = self.robot.mimic_children[i]
+                p.setJointMotorControl2(self.robot.id, joint.id, p.POSITION_CONTROL,
+                                    targetPosition=gripper_opening_angle * mimic_multiplier[i],
+                                    force=joint.maxForce,
+                                    maxVelocity=joint.maxVelocity)
+            p.stepSimulation()
+            time.sleep(1/240)
        
     def check_grasped(self):
         left_index = self.robot.get_Joint_by_name('left_inner_finger_pad_joint').id

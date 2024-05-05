@@ -56,12 +56,12 @@ class panda_robot:
                                self.get_Joint_by_name("right_inner_finger_joint")]
         
         # add force sensor
-        # p.enableJointForceTorqueSensor(self.id, self.get_Joint_by_name("left_inner_finger_pad_joint").id)
-        # p.enableJointForceTorqueSensor(self.id, self.get_Joint_by_name("right_inner_finger_pad_joint").id)
+        p.enableJointForceTorqueSensor(self.id, self.get_Joint_by_name("left_inner_finger_pad_joint").id)
+        p.enableJointForceTorqueSensor(self.id, self.get_Joint_by_name("right_inner_finger_pad_joint").id)
         
         # change friction coeff of gripper for better grasp
-        # p.changeDynamics(self.id, self.get_Joint_by_name('left_inner_finger_pad_joint').id, lateralFriction=1)
-        # p.changeDynamics(self.id, self.get_Joint_by_name('right_inner_finger_pad_joint').id, lateralFriction=1)
+        p.changeDynamics(self.id, self.get_Joint_by_name('left_inner_finger_pad_joint').id, lateralFriction=1)
+        p.changeDynamics(self.id, self.get_Joint_by_name('right_inner_finger_pad_joint').id, lateralFriction=1)
         
         self.get_bounds()
         self.reset()
@@ -147,7 +147,7 @@ class environment:
         # Load the ground plane
         # self.planeid = p.loadURDF("plane.urdf")
         # Load robot model
-        self.robot = panda_robot("environment/model_description/urdf/ur5_robotiq_85.urdf")
+        self.robot = panda_robot("environment/model_description/urdf/ur5_robotiq_140.urdf")
         
         # load tables
         # self.tableid = p.loadURDF('environment/urdf/objects/table.urdf',
