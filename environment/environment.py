@@ -140,10 +140,14 @@ class environment:
         p.setGravity(gravity[0], gravity[1], gravity[2])
 
         p.setAdditionalSearchPath(pybullet_data.getDataPath())
-        center_x, center_y = 0.05, -0.52
-        self.camera = Camera((center_x, center_y, 2.0), (center_x, center_y, 0.785), 0.2, 2.0, (224, 224), 40)
+        self.center_x, self.center_y = 0.05, -0.52
+        self.camera = Camera((self.center_x, self.center_y, 2.0), (self.center_x, self.center_y, 0.785), 0.2, 2.0, (224, 224), 40)
         self.world = obs.Obstacles(self.camera)
         
+        self.test_obj = p.loadURDF("/home/tien/panda-arm-pybullet/objects/ycb_objects/YcbBanana/model.urdf", [self.center_x, self.center_y, 0.785], p.getQuaternionFromEuler([0, 0, np.pi/2]))
+        for _ in range(10):
+            p.stepSimulation()
+            time.sleep(1/240)
         # Load the ground plane
         # self.planeid = p.loadURDF("plane.urdf")
         # Load robot model

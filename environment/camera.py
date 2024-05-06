@@ -28,7 +28,7 @@ class Camera:
         """
         # Get depth values using the OpenGL renderer
         _w, _h, rgb, depth, seg = p.getCameraImage(self.width, self.height, self.view_matrix, self.projection_matrix,)
-        return rgb, depth, seg
+        return rgb[:, :, 0:3], depth, seg
 
     def start_recording(self, save_dir):
         if not os.path.exists(save_dir):

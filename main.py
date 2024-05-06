@@ -22,31 +22,13 @@ if __name__ == '__main__':
 
     #get camera info from world
     camera = world.camera
-    gripper_opening_length_control = p.addUserDebugParameter("gripper_opening_length",
-                                            0,
-                                            0.085,
-                                            0.085)
 
-    # position control
-    position_control_group = []
-    position_control_group.append(p.addUserDebugParameter('x', -0.5, 0.5, 1))
-    position_control_group.append(p.addUserDebugParameter('y', -0.5, 0.5, 1))
-    position_control_group.append(p.addUserDebugParameter('z', -0.25, 1, 0.75))
-    position_control_group.append(p.addUserDebugParameter('roll', 0, 2*np.pi, np.pi/2))
-    position_control_group.append(p.addUserDebugParameter('pitch', 0, 2*np.pi, np.pi/2))
-    position_control_group.append(p.addUserDebugParameter('yaw', 0, 2*np.pi, 0))
-    while True:
-        gripper_opening_length = p.readUserDebugParameter(gripper_opening_length_control)
-        # print(f'gripper: {gripper_opening_length}')
-        parameter = []
-        for i in range(6):
-            parameter.append(p.readUserDebugParameter(position_control_group[i]))
-
-        parameter_orientation = p.getQuaternionFromEuler([parameter[3], parameter[4], parameter[5]])
-        robotControl.moveToPose(pose=[parameter[0], parameter[1], parameter[2] + 0.78], orientation=parameter_orientation)
-        
-        robotControl.gripper_control(gripper_opening_length)
-        # print(f'eef pose: {p.getJointState(robot.id, robot.end_effector.id)}')
-        time.sleep(2)
-
+    robotControl.move_away_arm()
+    generator = GraspGenerator(network_path, camera, 5)
+    rgb, depth, _ = camera.get_cam_img()
+    grasps, save_name = generator.predict_grasp(
+                rgb, depth, n_grasps=3, show_output=False)
+    x, y, z, roll, opening_len, obj_height = grasps[0]
+    print(grasps[0])
+    robotControl.grasp([x, y, z], roll, opening_len, obj_height) 
 

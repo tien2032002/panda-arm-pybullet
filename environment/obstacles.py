@@ -25,11 +25,11 @@ class Obstacles:
         self.target_table = p.loadURDF('objects/custom_objects/target_table.urdf', [0.7, 0.0, 0.66], p.getQuaternionFromEuler([0, 0, 0]), useFixedBase=True)
 
         # Add glass
-        self.cup = p.loadURDF("objects/custom_objects/glass_shelf.urdf", [0, -0.34, 0.88], p.getQuaternionFromEuler([0, 0, 0]), useFixedBase=True)
-        self.cup1 = p.loadURDF("objects/custom_objects/cup1.urdf", [0.34, -0.75, 0.88], p.getQuaternionFromEuler([0, 0, 0]), useFixedBase=True)
-        self.cup2 = p.loadURDF("objects/custom_objects/cup2.urdf", [-0.26, -0.58, 0.88], p.getQuaternionFromEuler([0, 0, 0]), useFixedBase=True)
-        self.cup3 = p.loadURDF("objects/custom_objects/cup3.urdf", [-0.05, -0.8, 0.88], p.getQuaternionFromEuler([0, 0, 0]), useFixedBase=True)
-        self.cup4 = p.loadURDF("objects/custom_objects/cup4.urdf", [-0.1, -0.42, 0.88], p.getQuaternionFromEuler([0, 0, 0]), useFixedBase=True)
+        # self.cup = p.loadURDF("objects/custom_objects/glass_shelf.urdf", [0, -0.34, 0.88], p.getQuaternionFromEuler([0, 0, 0]), useFixedBase=True)
+        # self.cup1 = p.loadURDF("objects/custom_objects/cup1.urdf", [0.34, -0.75, 0.88], p.getQuaternionFromEuler([0, 0, 0]), useFixedBase=True)
+        # self.cup2 = p.loadURDF("objects/custom_objects/cup2.urdf", [-0.26, -0.58, 0.88], p.getQuaternionFromEuler([0, 0, 0]), useFixedBase=True)
+        # self.cup3 = p.loadURDF("objects/custom_objects/cup3.urdf", [-0.05, -0.8, 0.88], p.getQuaternionFromEuler([0, 0, 0]), useFixedBase=True)
+        # self.cup4 = p.loadURDF("objects/custom_objects/cup4.urdf", [-0.1, -0.42, 0.88], p.getQuaternionFromEuler([0, 0, 0]), useFixedBase=True)
 
         # Robot arm
         self.arm_table = p.loadURDF("objects/custom_objects/arm_table.urdf", [-0.7, -0.36, 0.0], p.getQuaternionFromEuler([0, 0, 0]), useFixedBase=True)
